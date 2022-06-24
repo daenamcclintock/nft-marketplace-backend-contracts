@@ -4,7 +4,7 @@ const { developmentChains } = require("../../helper-hardhat-config")
 
 !developmentChains.includes(network.name)
     ? describe.skip
-    : describe("Nft Marketplace Unit Tests", function () {
+    : describe("Nft Marketplace Unit Tests", () => {
           let nftMarketplace, nftMarketplaceContract, basicNft, basicNftContract
           const PRICE = ethers.utils.parseEther("0.1")
           const TOKEN_ID = 0
@@ -22,13 +22,13 @@ const { developmentChains } = require("../../helper-hardhat-config")
               await basicNft.approve(nftMarketplaceContract.address, TOKEN_ID)
           })
 
-          describe("listItem", function () {
-              it("emits an event after listing an item", async function () {
+          describe("listItem", () => {
+              it("emits an event after listing an item", async () => {
                   expect(await nftMarketplace.listItem(basicNft.address, TOKEN_ID, PRICE)).to.emit(
                       "ItemListed"
                   )
               })
-              it("exclusively items that haven't been listed", async function () {
+              it("exclusively items that haven't been listed", async () => {
                   await nftMarketplace.listItem(basicNft.address, TOKEN_ID, PRICE)
                   const error = `AlreadyListed("${basicNft.address}", ${TOKEN_ID})`
                   //   await expect(
@@ -38,34 +38,35 @@ const { developmentChains } = require("../../helper-hardhat-config")
                       nftMarketplace.listItem(basicNft.address, TOKEN_ID, PRICE)
                   ).to.be.revertedWith(error)
               })
-              it("exclusively allows owners to list", async function () {
+              it("exclusively allows owners to list", async () => {
                   nftMarketplace = nftMarketplaceContract.connect(user)
                   await basicNft.approve(user.address, TOKEN_ID)
                   await expect(
                       nftMarketplace.listItem(basicNft.address, TOKEN_ID, PRICE)
                   ).to.be.revertedWith("NotOwner")
               })
-              it("needs approvals to list item", async function () {
+              it("needs approvals to list item", async () => {
                   await basicNft.approve(ethers.constants.AddressZero, TOKEN_ID)
                   await expect(
                       nftMarketplace.listItem(basicNft.address, TOKEN_ID, PRICE)
                   ).to.be.revertedWith("NotApprovedForMarketplace")
               })
-              it("Updates listing with seller and price", async function () {
+              it("Updates listing with seller and price", async () => {
                   await nftMarketplace.listItem(basicNft.address, TOKEN_ID, PRICE)
                   const listing = await nftMarketplace.getListing(basicNft.address, TOKEN_ID)
                   assert(listing.price.toString() == PRICE.toString())
                   assert(listing.seller.toString() == deployer.address)
               })
           })
-          describe("deleteListing", function () {
-              it("reverts if there is no listing", async function () {
+          
+          describe("deleteListing", () => {
+              it("reverts if there is no listing", async () => {
                   const error = `NotListed("${basicNft.address}", ${TOKEN_ID})`
                   await expect(
                       nftMarketplace.deleteListing(basicNft.address, TOKEN_ID)
                   ).to.be.revertedWith(error)
               })
-              it("reverts if anyone but the owner tries to call", async function () {
+              it("reverts if anyone but the owner tries to call", async () => {
                   await nftMarketplace.listItem(basicNft.address, TOKEN_ID, PRICE)
                   nftMarketplace = nftMarketplaceContract.connect(user)
                   await basicNft.approve(user.address, TOKEN_ID)
@@ -73,7 +74,7 @@ const { developmentChains } = require("../../helper-hardhat-config")
                       nftMarketplace.deleteListing(basicNft.address, TOKEN_ID)
                   ).to.be.revertedWith("NotOwner")
               })
-              it("emits event and removes listing", async function () {
+              it("emits event and removes listing", async () => {
                   await nftMarketplace.listItem(basicNft.address, TOKEN_ID, PRICE)
                   expect(await nftMarketplace.deleteListing(basicNft.address, TOKEN_ID)).to.emit(
                       "ItemCanceled"
@@ -82,4 +83,6 @@ const { developmentChains } = require("../../helper-hardhat-config")
                   assert(listing.price.toString() == "0")
               })
           })
+
+          describe("buyItem", )
     })
