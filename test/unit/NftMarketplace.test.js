@@ -188,7 +188,7 @@ const { developmentChains } = require("../../helper-hardhat-config")
 
                 assert(
                     deployerBalanceAfter.add(gasCost).toString() ==
-                        deployerProceedsBefore.add(deployerBalanceBefore).toString()
+                    deployerProceedsBefore.add(deployerBalanceBefore).toString()
                 )
             })
         })
