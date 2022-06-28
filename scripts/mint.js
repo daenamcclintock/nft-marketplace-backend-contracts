@@ -8,8 +8,9 @@ const mint = async () => {
     console.log("Minting NFT...")
     const mintTransaction = await basicNft.mintNft()
     const mintTransactionReceipt = await mintTransaction.wait(1)
+    const tokenId = mintTransactionReceipt.events[0].args.tokenId.toString()
     console.log(
-        `Minted tokenId ${mintTransactionReceipt.events[0].args.tokenId.toString()} from contract: ${
+        `Minted tokenId ${tokenId} from contract: ${
             basicNft.address
         }`
     )
