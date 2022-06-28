@@ -2,7 +2,7 @@ const { moveBlocks } = require("../utils/move-blocks")
 
 const BLOCKS = 5
 
-async function mine() {
+const mine = async () => {
     await moveBlocks(BLOCKS)
 }
 
