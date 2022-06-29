@@ -9,7 +9,6 @@ const mintAndList = async () => {
     console.log("Minting NFT...")
     const mintTransaction = await basicNft.mintNft()
     const mintTransactionReceipt = await mintTransaction.wait(1)
-    console.log("Mint Transaction Receipt: ", mintTransactionReceipt)
 
     const TOKEN_ID = mintTransactionReceipt.events[0].args.tokenId
 
@@ -20,7 +19,6 @@ const mintAndList = async () => {
     console.log("Listing NFT...")
     const listTransaction = await nftMarketplace.listItem(basicNft.address, TOKEN_ID, PRICE)
     const listedTransactionReceipt = await listTransaction.wait(1)
-    console.log("Listed Transaction Receipt: ", listedTransactionReceipt)
 
     if (network.config.chainId == "31337") {
         await moveBlocks(2, (sleepAmount = 1000)) // waiting 1ms in between mined blocks
@@ -29,7 +27,10 @@ const mintAndList = async () => {
 
 
 mintAndList()
-    .then(() => process.exit(0))
+    .then(() => {
+        console.log("Successfully minted and listed NFT!")
+        process.exit(0)
+    })
     .catch((error) => {
         console.error(error)
         process.exit(1)
