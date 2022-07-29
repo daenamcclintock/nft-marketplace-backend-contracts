@@ -15,7 +15,7 @@ const { developmentChains } = require("../../helper-hardhat-config")
             user = accounts[1]
             await deployments.fixture(["all"])
             nftMarketplaceContract = await ethers.getContract("NftMarketplace")
-            nftMarketplace = nftMarketplaceContract.connect(deployer)
+            nftMarketplace = await nftMarketplaceContract.connect(deployer)
             basicNftContract = await ethers.getContract("BasicNft")
             basicNft = await basicNftContract.connect(deployer)
             await basicNft.mintNft()
@@ -190,6 +190,20 @@ const { developmentChains } = require("../../helper-hardhat-config")
                     deployerBalanceAfter.add(gasCost).toString() ==
                     deployerProceedsBefore.add(deployerBalanceBefore).toString()
                 )
+            })
+        })
+
+        describe("getListing", () => {
+            it("returns the seller's proceeds after the sale of an NFT", async () => {
+                await nftMarketplace.listItem(basicNft.address, TOKEN_ID, PRICE)
+                nftMarketplace = nftMarketplaceContract.connect(user)
+                await nftMarketplace.buyItem(basicNft.address, TOKEN_ID, { value: PRICE })
+                nftMarketplace = nftMarketplaceContract.connect(deployer)
+
+                const deployerProceeds = await nftMarketplace.getProceeds(deployer.address)
+                console.log(`Deployer proceeds, post sale: ${ethers.utils.formatEther(deployerProceeds)} ETH`)
+
+                assert(ethers.utils.formatEther(deployerProceeds).toString() == ethers.utils.formatEther(PRICE).toString())
             })
         })
     })
